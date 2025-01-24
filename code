@@ -1,0 +1,50 @@
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <chrono>
+#include <cstdlib>
+
+using namespace std;
+
+mutex mtx;
+
+const int numberOfRoads = 8;
+const int greenTime = 6;
+const int yellowTime = 4;
+
+void displayLights(int currentGreenRoad, const string& phase) {
+    lock_guard<mutex> lock(mtx);
+    
+    system("CLS"); // Clear the screen
+    cout << "Current light " << phase << ": Quadrant " << currentGreenRoad + 1 << endl;
+
+    for (int r = 0; r < numberOfRoads; ++r) {
+        if (r == currentGreenRoad) {
+            cout << "Quadrant " << r + 1 << ": " << phase << endl;
+
+        } else {
+            cout << "Quadrant " << r + 1 << ": RED" << endl;
+        }
+    }
+    cout << "===" << endl;
+}
+
+void trafficLightSystem() {
+    int currentGreenRoad = 0;
+
+    while (true) {
+        displayLights(currentGreenRoad, "GREEN");
+        this_thread::sleep_for(chrono::seconds(greenTime));
+
+        displayLights(currentGreenRoad, "YELLOW");
+        this_thread::sleep_for(chrono::seconds(yellowTime));
+
+        currentGreenRoad = (currentGreenRoad + 1) % numberOfRoads;
+    }
+}
+
+int main() {
+    thread trafficThread(trafficLightSystem);
+    trafficThread.join();
+    return 0;
+}
